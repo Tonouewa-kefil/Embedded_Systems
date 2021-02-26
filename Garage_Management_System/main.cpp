@@ -24,6 +24,8 @@
 #define PRESSURE_1_PIN A0
 #define PRESSURE_2_PIN A1
 
+//LCD Pin Assignment
+
 //Setting up the lights as output
 DigitalOut RED_LIGHT_1(RED_1_PIN);
 DigitalOut RED_LIGHT_2(RED_2_PIN);
@@ -50,5 +52,5 @@ AnalogIn PRESSURE_2 (PRESSURE_2_PIN);
 
 int main()
 {
-
+//Get the Ultrasonic sensors to mesure distances
 }
