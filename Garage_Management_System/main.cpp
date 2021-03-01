@@ -1,4 +1,7 @@
 #include "mbed.h"
+#include "HCSR04.H"
+
+#define PARKING_SPACE_TOTAL 100
 
 //Light Pin Assignment
 #define RED_1_PIN D6
@@ -52,5 +55,75 @@ AnalogIn PRESSURE_2 (PRESSURE_2_PIN);
 
 int main()
 {
-//Get the Ultrasonic sensors to mesure distances
+    int8_t Car_In = 0; 
+    int8_t Car_Out = 0;
+
+    //Setting the red lights to 1 
+    RED_LIGHT_1 = 1;
+    RED_LIGHT_2 = 1;
+    
+    //Setting the green lights to 0
+    GREEN_LIGHT_1 = 0;
+    GREEN_LIGHT_2 = 0;
+    
+    //Ultrasonic Sensor Stuff
+        //If the value fetched from here is less than a certain value
+        //Than we know there is an object close to the gate else we 
+        //don't change anything
+    HCSR04 Ultrasonic_1(TRIGGER_1,ECHO_1);
+    HCSR04 Ultrasonic_2(TRIGGER_2,ECHO_2);
+    bool isObjectClose_1 = false;
+    bool isObjectClose_2 = false;
+    uint8_t Distance_1 = 0;
+    uint8_t Distance_2 = 0;
+    
+    //Pressure Sensor Stuff
+        //If the value fetched from here is greater than a certain value 
+        //than we know it is a car else we don't change anything
+    float Pressure_Sensor_1 = 0;
+    float Pressure_Sensor_2 = 0;
+    bool isCar_1 = false; 
+    bool isCar_2 = false;
+    while(1)
+    {
+        //Calculating the distance from ultrasonic sensor to potential object (Entrance)
+        Distance_1 = Ultrasonic_1.distance(cm);
+        if(Distance_1 < 3)
+        {
+                isObjectClose_1 = true;
+        }
+        else
+        {
+                isObjectClose_1 = false;
+        }
+        
+        //Reading the value of the pressure sensor located at the entrance if there is an object close to the gate
+        if(isOjectClose)
+        {
+            Pressure_Sensor_1 = PRESSURE_1.read();
+            Pressure_Sensor_1 = 00000000000; 
+        }
+        
+        //Calculating the distance from ultrasonic sensor to potential object (Exit)
+        Distance_2 = Ultrasonic_2.distance(cm);
+        if(Distance_2 < 3)
+        {
+                isObjectClose_2 = true;
+        }
+        else
+        {
+                isObjectClose_2 = false;
+        }
+        
+        //Reading the value of the pressure sensor located at the exit if there is an object close to the gate
+        if(isOjectClose)
+        {
+            Pressure_Sensor_1 = PRESSURE_1.read();
+            Pressure_Sensor_1 = 00000000000; 
+        }
+    
+        
+           
+    }
+
 }
