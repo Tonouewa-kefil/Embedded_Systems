@@ -1,5 +1,6 @@
 #include "mbed.h"
-#include "HCSR04.H"
+#include "HCSR04.h"
+#include "Servo.h"
 
 #define PARKING_SPACE_TOTAL 100
 
@@ -26,6 +27,8 @@
 //Pressure Sensor Pin Assignement
 #define PRESSURE_1_PIN A0
 #define PRESSURE_2_PIN A1
+#define VCC 5.00
+#define R_DIV 3230.0
 
 //LCD Pin Assignment
 
@@ -55,6 +58,7 @@ AnalogIn PRESSURE_2 (PRESSURE_2_PIN);
 
 int main()
 {
+    //Car counting variables
     int8_t Car_In = 0; 
     int8_t Car_Out = 0;
 
@@ -70,8 +74,8 @@ int main()
         //If the value fetched from here is less than a certain value
         //Than we know there is an object close to the gate else we 
         //don't change anything
-    HCSR04 Ultrasonic_1(TRIGGER_1,ECHO_1);
-    HCSR04 Ultrasonic_2(TRIGGER_2,ECHO_2);
+    HCSR04 Ultrasonic_1(TRIGGER_1_PIN,ECHO_1_PIN);
+    HCSR04 Ultrasonic_2(TRIGGER_2_PIN,ECHO_2_PIN);
     bool isObjectClose_1 = false;
     bool isObjectClose_2 = false;
     uint8_t Distance_1 = 0;
@@ -80,14 +84,29 @@ int main()
     //Pressure Sensor Stuff
         //If the value fetched from here is greater than a certain value 
         //than we know it is a car else we don't change anything
-    float Pressure_Sensor_1 = 0;
-    float Pressure_Sensor_2 = 0;
+    int Pressure_Sensor_1 = 0;
+    float fsrR_1;
+    float fsrV_1;
+    float fsrG_1;
+    float force_1;
+    int Pressure_Sensor_2 = 0;
+    float fsrR_2;
+    float fsrV_2;
+    float fsrG_2;
+    float force_2;
     bool isCar_1 = false; 
     bool isCar_2 = false;
+    
+    //Servo Motor Stuff
+    Servo entranceGate(SERVO_MOTOR_1_PIN);
+    Servo exitGate(SERVO_MOTOR_2_PIN);
+    
+    
+    
     while(1)
     {
         //Calculating the distance from ultrasonic sensor to potential object (Entrance)
-        Distance_1 = Ultrasonic_1.distance(cm);
+        Distance_1 = Ultrasonic_1.distance(1);
         if(Distance_1 < 3)
         {
                 isObjectClose_1 = true;
@@ -98,14 +117,63 @@ int main()
         }
         
         //Reading the value of the pressure sensor located at the entrance if there is an object close to the gate
-        if(isOjectClose)
+        if(isObjectClose_1)
         {
-            Pressure_Sensor_1 = PRESSURE_1.read();
-            Pressure_Sensor_1 = 00000000000; 
+             Pressure_Sensor_1 = PRESSURE_1.read();
+            //If the value from the pressure sensor is greater than a certain value then it is a car
+            if (Pressure_Sensor_1 != 0)
+            {
+                 // Use ADC reading to calculate voltage:
+                float fsrV_1 = Pressure_Sensor_1 * VCC / 1023.0;
+                
+                // Use voltage and static resistor value to 
+                // calculate FSR resistance:
+                float fsrR_1 = R_DIV * (VCC / fsrV_1 - 1.0);
+                // Guesstimate force based on slopes in figure 3 of
+                // FSR datasheet:
+                float fsrG_1 = 1.0 / fsrR_1; // Calculate conductance
+                // Break parabolic curve down into two linear slopes:
+                if (fsrR_1 <= 600) 
+                  force_1 = (fsrG_1 - 0.00075) / 0.00000032639;
+                else
+                  force_1 =  fsrG_1 / 0.000000642857;  
+                
+                if(force_1 > 0)
+                {
+                    isCar_1 = true;    
+                }          
+                else
+                {
+                    isCar_1 = false;
+                }
+            }
+        }
+        
+        //If a car is detected then open the gate and give the driver a green light.
+        if(isCar_1)
+        {
+            //open the gate(Entrance)   
+            for(float p=0; p<1.0; p += 0.1) 
+            {
+                entranceGate = p;
+                wait(0.2);
+            }
+            GREEN_LIGHT_1 = 1;
+            
+            /////////////////////////////////////////////////////something need to happen between this steps
+            //close the gate(Entrance)   
+            for(float p=1; p>0.1; p -= 0.1) 
+            {
+                entranceGate = p;
+                wait(0.2);
+            }
+            RED_LIGHT_1 = 1;
+        
+        
         }
         
         //Calculating the distance from ultrasonic sensor to potential object (Exit)
-        Distance_2 = Ultrasonic_2.distance(cm);
+        Distance_2 = Ultrasonic_2.distance(1);
         if(Distance_2 < 3)
         {
                 isObjectClose_2 = true;
@@ -116,14 +184,62 @@ int main()
         }
         
         //Reading the value of the pressure sensor located at the exit if there is an object close to the gate
-        if(isOjectClose)
+        if(isObjectClose_2)
         {
-            Pressure_Sensor_1 = PRESSURE_1.read();
-            Pressure_Sensor_1 = 00000000000; 
+            Pressure_Sensor_2 = PRESSURE_2.read();
+            //If the value from the pressure sensor is greater than a certain value then it is a car
+            if (Pressure_Sensor_2 != 0)
+            {
+                 // Use ADC reading to calculate voltage:
+                float fsrV_2 = Pressure_Sensor_2 * VCC / 1023.0;
+                
+                // Use voltage and static resistor value to 
+                // calculate FSR resistance:
+                float fsrR_2 = R_DIV * (VCC / fsrV_2 - 1.0);
+                // Guesstimate force based on slopes in figure 3 of
+                // FSR datasheet:
+                float fsrG_2 = 1.0 / fsrR_2; // Calculate conductance
+                // Break parabolic curve down into two linear slopes:
+                if (fsrR_2 <= 600) 
+                  force_2 = (fsrG_2 - 0.00075) / 0.00000032639;
+                else
+                  force_2 =  fsrG_2 / 0.000000642857;  
+                
+                if(force_2 > 0)
+                {
+                    isCar_2 = true;    
+                }          
+                else
+                {
+                    isCar_2 = false;
+                }
+
+        }
+        
+        //If a car is detected then open the gate and give the driver a green light.
+        if(isCar_2)
+        {
+            //open the gate(Exit)   
+            for(float p=0; p<1.0; p += 0.1) 
+            {
+                exitGate = p;
+                wait(0.2);
+            }
+            GREEN_LIGHT_1 = 1;
+            
+            //Close the gate (Exit)
+            for(float p=1; p>0.1; p -= 0.1) 
+            {
+                exitGate = p;
+                wait(0.2);
+            }
+            RED_LIGHT_1 = 1;
+        
+        
         }
     
         
            
     }
 
-}
+}}
