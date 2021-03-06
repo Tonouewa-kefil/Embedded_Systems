@@ -159,7 +159,7 @@ int main()
                 wait(0.2);
             }
             GREEN_LIGHT_1 = 1;
-            
+            delay
             /////////////////////////////////////////////////////something need to happen between this steps
             //close the gate(Entrance)   
             for(float p=1; p>0.1; p -= 0.1) 
@@ -234,12 +234,7 @@ int main()
                 wait(0.2);
             }
             RED_LIGHT_1 = 1;
-        
-        
         }
-    
-        
-           
     }
-
-}}
+}
+}
