@@ -1,3 +1,4 @@
+
 #include "mbed.h"
 #include "hcsr04.h"
 #include "Servo.h"
@@ -115,7 +116,7 @@ int main()
                     GREEN_LIGHT_1 = 0; 
                     RED_LIGHT_1 = 1;
                     flag =1;
-                    char val = 1;
+                    char val = '1';
                     exit.putc(val);
                 }
             }     
