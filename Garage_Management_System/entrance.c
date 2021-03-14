@@ -74,46 +74,41 @@ int main()
     Servo entranceGate(SERVO_MOTOR_1_PIN);
 
     int flag = 1;
-
     while(1) 
     {
         
         //Calculating the distance from ultrasonic sensor to potential object (Entrance)
-        Distance_1 = Ultrasonic_1.distance();
-        if(Distance_1 < 8)
+        if(flag == 1)
         {
-                isObjectClose_1 = true;
-        }        
-        else
-        {
-                isObjectClose_1 = false;
-        }
-        
-
-        //Setting the Force sensor stuff (Entrance)
-        //isObjectClose_1 = true;
-        
-        if(isObjectClose_1)
-        {
+            Distance_1 = Ultrasonic_1.distance();
             Pressure_Sensor_1 = PRESSURE_1.read();
             Pressure_Sensor_1 = VCC * Pressure_Sensor_1;
-            //This will need to be calibrated
-            if (Pressure_Sensor_1 > 2.5 ) 
+            if(Distance_1 < 8 && Pressure_Sensor_1 > 2.5 )
             {
-                 //open the gate(Entrance) 
-                if (flag == 1) 
-                {
-                    flag = 0;
-                    for(float p=0; p<2; p += 0.1) 
+                //isObjectClose_1 = true;
+                
+                //This will need to be calibrated
+                    //open the gate(Entrance) 
+                    if (flag == 1) 
                     {
-                        entranceGate = p;
-                        thread_sleep_for(50);
+                        flag = 0;
+                        for(float p=0; p<2; p += 0.1) 
+                        {
+                            entranceGate = p;
+                            thread_sleep_for(50);
+                        }
+                        //is Car_1 = false;
+                        RED_LIGHT_1 = 0;
+                        GREEN_LIGHT_1 = 1;
                     }
-                    //isCar_1 = false;
-                    RED_LIGHT_1 = 0;
-                    GREEN_LIGHT_1 = 1;
-                }
-                if ( (PRESSURE_1.read()*VCC) < 2.5 ) 
+                
+            }
+        }
+        else        
+        {
+        //Setting the Force sensor stuff (Entrance)
+        //isObjectClose_1 = true;
+            if((PRESSURE_1.read()*VCC) < 2.5 ) 
                 {
                     thread_sleep_for(10000);
                     for(float p=2; p>0; p -= 0.1) 
@@ -124,6 +119,7 @@ int main()
                     GREEN_LIGHT_1 = 0; 
                     RED_LIGHT_1 = 1;
                     flag =1;
+                    flag =1;
                     Space_available = Space_available - 1;
                 }
                 if(entrance.readable()) 
@@ -131,9 +127,8 @@ int main()
                     int val = entrance.getc();
                     Space_available = Space_available + val;
                 }
-                lcd.locate(7,1);
-                lcd.printf("%d",Space_available);
+                    lcd.locate(7,1);
+                    lcd.printf("%d",Space_available);
             }     
         }
     }
-} 
