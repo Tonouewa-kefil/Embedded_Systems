@@ -106,7 +106,7 @@ int main()
         //isObjectClose_1 = true;
             if((PRESSURE_1.read()*VCC) < 2.5 ) 
                 {
-                    thread_sleep_for(10000);
+                    thread_sleep_for(5000);
                     for(float p=2; p>0; p -= 0.1) 
                     {
                         entranceGate = p;
@@ -115,7 +115,7 @@ int main()
                     GREEN_LIGHT_1 = 0; 
                     RED_LIGHT_1 = 1;
                     flag =1;
-                    int val = 1;
+                    char val = 1;
                     exit.putc(val);
                 }
             }     
